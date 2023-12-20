@@ -41,16 +41,25 @@ void msort(int *arr, int n) {
   if (n < 2)
     return;
   int mid = n / 2;
+  msort(arr, mid);
+  msort(arr+mid, n-mid);
+  merge(arr, n, mid);
+}
+
+void msort_binary(int *arr, int n) {
+  if (n < 2)
+    return;
+  int mid = n / 2;
   pthread_t t;
   struct msortargs args = { arr, mid };
   pthread_create(&t, NULL, start, (void *) &args);
-  msort(arr + mid, n - mid);
+  msort(arr+mid, n-mid);
   pthread_join(t, NULL);
   merge(arr, n, mid);
 }
 
 int main () {
-  int n = 1 << 14;
+  int n = 1 << 24;
   int *arr = malloc(n * sizeof(int));
   // populate array with n many random integers
   srand(1234);
@@ -62,7 +71,7 @@ int main () {
   // actually sort, and time cpu use
   struct profile_times t;
   profile_start(&t);
-  msort(arr, n);
+  msort_binary(arr, n);
   profile_log(&t);
 
   // assert that the output is sorted
